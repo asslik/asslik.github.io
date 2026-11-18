@@ -1,0 +1,18 @@
+---
+import { Picture } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { visible } from '../data/content';
+
+interface Props { project: CollectionEntry<'projects'> }
+const { id, data } = Astro.props.project;
+const cover = visible(data.media)[0];
+---
+<article class="card rise">
+  <div class:list={['card__media', cover.kind !== 'photo' && 'card__media--plate']}>
+    <Picture src={cover.src} alt={cover.alt} formats={['avif']} fallbackFormat="webp" widths={[480, 800, Math.min(1200, cover.src.width)]} sizes="(max-width: 760px) 100vw, 50vw" quality={78} />
+  </div>
+  <p class="meta">{data.context}{data.year ? ` · ${data.year}` : ''}</p>
+  <h3><a href={`/projects/${id}/`}>{data.title}</a></h3>
+  <p>{data.summary}</p>
+  <ul class="tags">{data.tools.slice(0, 5).map((t) => <li>{t}</li>)}</ul>
+</article>

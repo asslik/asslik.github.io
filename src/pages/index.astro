@@ -3,12 +3,14 @@ import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Figure from '../components/Figure.astro';
 import Icon from '../components/Icon.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import SectionHead from '../components/SectionHead.astro';
 import portrait from '../assets/portrait.jpg';
 import { awards, education, profile } from '../data/profile';
-import { getExperience, getResearch, getTeaching, statusLabel, visible } from '../data/content';
+import { getExperience, getProjects, getResearch, getTeaching, statusLabel, visible } from '../data/content';
 
-const [research, experience, teaching] = await Promise.all([getResearch(), getExperience(), getTeaching()]);
+const [research, experience, teaching, projects] = await Promise.all([getResearch(), getExperience(), getTeaching(), getProjects()]);
+const featuredProjects = projects.filter((p) => visible(p.data.media).length);
 const lecture = teaching.find((t) => t.id === 'visual-slam-lecture')!;
 const programme = teaching.find((t) => t.id === 'programme-national')!;
 const hall = visible(programme.data.media).find((m) => m.src.src.includes('hall'));
@@ -29,6 +31,8 @@ const jsonLd = {
       <div class="btn-row">
         <a class="btn btn--solid-light" href="/research/">View research</a>
         <a class="btn btn--light" href={profile.cv} download={profile.cvName}><Icon name="download" /> Download CV</a>
+        <a class="btn btn--light" href={profile.linkedin} data-email={profile.email}><Icon name="mail" /> Email me</a>
+        <a class="btn btn--light" href={profile.linkedin} rel="me noopener" target="_blank">LinkedIn <Icon name="out" /></a>
       </div>
       <div class="hero__foot">
         <div class="legend" aria-label="Animation legend">
@@ -101,6 +105,15 @@ const jsonLd = {
             </article>
           );
         })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="projects-title">
+    <div class="wrap">
+      <SectionHead id="projects-title" title="Projects" href="/projects/" linkLabel="All projects" />
+      <div class="cards">
+        {featuredProjects.map((project) => <ProjectCard project={project} />)}
       </div>
     </div>
   </section>

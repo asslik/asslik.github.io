@@ -1,4 +1,4 @@
-// Theme switch, mobile menu, header state, e-mail links and copy buttons.
+// Theme switch, mobile menu, header state, e-mail and phone links, and copy buttons.
 const root = document.documentElement;
 const header = document.querySelector<HTMLElement>('.site-header');
 
@@ -29,10 +29,19 @@ if (header?.classList.contains('site-header--hero')) {
   }
 }
 
+const reveal = (encoded = '') => atob(encoded).split('').reverse().join('');
+
 document.querySelectorAll<HTMLAnchorElement>('[data-email]').forEach((link) => {
-  const address = atob(link.dataset.email ?? '').split('').reverse().join('');
+  const address = reveal(link.dataset.email);
   link.href = `mailto:${address}`;
   if (link.hasAttribute('data-email-show')) link.textContent = address;
+});
+
+document.querySelectorAll<HTMLAnchorElement>('[data-phone]').forEach((link) => {
+  const number = reveal(link.dataset.phone);
+  link.href = `tel:${number.replace(/\s/g, '')}`;
+  const label = link.querySelector('span');
+  if (label) label.textContent = number;
 });
 
 document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {

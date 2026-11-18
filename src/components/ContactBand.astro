@@ -1,7 +1,6 @@
 ---
 import Icon from './Icon.astro';
 import { profile } from '../data/profile';
-const email = Buffer.from(`${profile.email.user}@${profile.email.domain}`.split('').reverse().join('')).toString('base64');
 ---
 <section class="contact" aria-labelledby="contact-title">
   <div class="wrap contact__in">
@@ -10,8 +9,9 @@ const email = Buffer.from(`${profile.email.user}@${profile.email.domain}`.split(
       <p>For research collaborations, engineering roles or training, email is the best way to reach me.</p>
     </div>
     <div class="btn-row">
-      <a class="btn btn--solid-light" href={profile.linkedin} data-email={email}><Icon name="mail" /> Email me</a>
+      <a class="btn btn--solid-light" href={profile.linkedin} data-email={profile.email}><Icon name="mail" /> Email me</a>
       <a class="btn btn--light" href={profile.linkedin} rel="me noopener" target="_blank">LinkedIn <Icon name="out" /></a>
+      <a class="btn btn--light" href={profile.linkedin} data-phone={profile.phone}><Icon name="phone" /> <span>Phone</span></a>
     </div>
   </div>
 </section>

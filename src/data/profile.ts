@@ -1,3 +1,6 @@
+// Reversed and base64-encoded, then decoded in the browser, so plain-text scrapers miss them.
+const hide = (text: string) => Buffer.from(text.split('').reverse().join('')).toString('base64');
+
 export const profile = {
   name: 'Hatim Asslik',
   headline: 'Electrical Engineer · Computer Vision, AI & Robotics',
@@ -8,7 +11,8 @@ export const profile = {
   description:
     'Hatim Asslik is an electrical engineer working on computer vision, AI and robotics, with research experience in visual SLAM and 3D Gaussian Splatting.',
   // Assembled in the browser so the address is not sitting in the page source.
-  email: { user: 'hatimasslik', domain: 'gmail.com' },
+  email: hide(['hatimasslik', 'gmail.com'].join('@')),
+  phone: hide(['+212', '617', '181', '730'].join(' ')),
   linkedin: 'https://www.linkedin.com/in/hatim-asslik/',
   // Neutral address so the name is not in the URL; visitors still save it under cvName.
   cv: '/cv/cv.pdf',

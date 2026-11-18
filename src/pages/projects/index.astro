@@ -1,6 +1,6 @@
 ---
-import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
 import SectionHead from '../../components/SectionHead.astro';
 import { getProjects, visible } from '../../data/content';
 
@@ -16,20 +16,7 @@ const others = projects.filter((p) => !visible(p.data.media).length);
       <p class="lead">Engineering work across robotics, embedded systems, IoT and applied machine learning.</p>
     </header>
     <div class="cards">
-      {featured.map(({ id, data }) => {
-        const cover = visible(data.media)[0];
-        return (
-          <article class="card rise">
-            <div class:list={['card__media', cover.kind !== 'photo' && 'card__media--plate']}>
-              <Picture src={cover.src} alt={cover.alt} formats={['avif']} fallbackFormat="webp" widths={[480, 800, Math.min(1200, cover.src.width)]} sizes="(max-width: 760px) 100vw, 50vw" quality={78} />
-            </div>
-            <p class="meta">{data.context}{data.year ? ` · ${data.year}` : ''}</p>
-            <h3><a href={`/projects/${id}/`}>{data.title}</a></h3>
-            <p>{data.summary}</p>
-            <ul class="tags">{data.tools.slice(0, 5).map((t) => <li>{t}</li>)}</ul>
-          </article>
-        );
-      })}
+      {featured.map((project) => <ProjectCard project={project} />)}
     </div>
   </div>
   <section class="section" aria-labelledby="also-title">

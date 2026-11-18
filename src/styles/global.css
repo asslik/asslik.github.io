@@ -461,6 +461,8 @@ td.em { color: var(--accent); font-weight: 600; }
   .site-nav a[aria-current='page'] { color: var(--accent); }
   .site-nav a[aria-current='page']::after { display: none; }
   .hero { min-height: 100svh; }
+  /* Keeps a clear band for the animation above the name, even on short phones. */
+  .hero__in { padding-top: calc(var(--header) + 9.5rem); }
   .hero::before { background: linear-gradient(0deg, rgba(11, 14, 17, .98) 0%, rgba(11, 14, 17, .88) 62%, rgba(11, 14, 17, .08) 84%); }
   .hero .btn-row .btn { flex: 1 1 9rem; }
   .stats, .cards, .split, .figure-stack--2 { grid-template-columns: minmax(0, 1fr); }
