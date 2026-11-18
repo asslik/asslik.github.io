@@ -1,0 +1,41 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import { getResearch } from '../../../data/content';
+
+export async function getStaticPaths() {
+  return (await getResearch()).map((paper) => ({ params: { slug: paper.id }, props: { paper } }));
+}
+const { paper } = Astro.props;
+---
+<Base title={`Read ${paper.data.short}`} description={paper.data.summary} bare noindex>
+  <section class="reader" data-reader data-id={paper.id} data-src={`/papers/${paper.id}.dat`} aria-label={`Paper: ${paper.data.title}`}>
+    <div class="reader__bar">
+      <div class="reader__title"><a href={`/research/${paper.id}/`} aria-label="Back to overview">← <span>Overview</span></a><span>{paper.data.title}</span></div>
+      <div class="reader__tools">
+        <button type="button" data-prev aria-label="Previous page"><Icon name="up" /></button>
+        <label class="reader__page"><input data-page type="number" min="1" value="1" inputmode="numeric" aria-label="Page number" /> / <span data-total>–</span></label>
+        <button type="button" data-next aria-label="Next page"><Icon name="down" /></button>
+        <span class="sep"></span>
+        <button type="button" data-zoom-out aria-label="Zoom out">−</button>
+        <span class="reader__zoom" data-zoom-label aria-live="polite">100%</span>
+        <button type="button" data-zoom-in aria-label="Zoom in">+</button>
+        <button class="reader__fit" type="button" data-fit aria-label="Fit to width"><Icon name="fit" /></button>
+        <button type="button" data-fullscreen aria-label="Full screen"><Icon name="expand" /></button>
+      </div>
+    </div>
+    <div class="reader__scroll" tabindex="0">
+      <div class="reader__state"><p data-message>Loading paper…</p><div class="reader__progress"><i></i></div></div>
+      <div class="reader__pages"></div>
+    </div>
+    <p class="reader__note">View only. Download and printing are turned off for this paper.</p>
+    <noscript><p class="reader__note">JavaScript is needed to display this paper.</p></noscript>
+  </section>
+  <p class="print-note wrap">Printing is turned off for this paper.</p>
+  <script>
+    import('../../../scripts/paper-reader.ts').catch(() => {
+      const message = document.querySelector('[data-message]');
+      if (message) message.textContent = 'The reader could not start. Please reload the page.';
+    });
+  </script>
+</Base>

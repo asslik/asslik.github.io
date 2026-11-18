@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import Figure from '../components/Figure.astro';
+import { getExperience, getProjects, getResearch, getTeaching, visible, type Media } from '../data/content';
+
+const [research, experience, projects, teaching] = await Promise.all([getResearch(), getExperience(), getProjects(), getTeaching()]);
+type Item = { item: Media; group: string; source: string; href: string };
+const items: Item[] = [
+  ...research.flatMap((e) => visible(e.data.media).map((item) => ({ item, group: 'Research', source: e.data.short, href: `/research/${e.id}/` }))),
+  ...experience.flatMap((e) => visible(e.data.media).map((item) => ({ item, group: 'Research', source: 'Lab work', href: '/research/' }))),
+  ...projects.flatMap((e) => visible(e.data.media).map((item) => ({ item, group: 'Engineering', source: e.data.title, href: `/projects/${e.id}/` }))),
+  ...teaching.flatMap((e) => visible(e.data.media).map((item) => ({ item, group: 'Teaching', source: e.data.title, href: '/teaching/' }))),
+];
+const groups = ['Research', 'Engineering', 'Teaching'];
+---
+<Base title="Media" description="Images from the research, engineering projects and teaching of Hatim Asslik.">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">Media</p>
+      <h1>Work in pictures</h1>
+      <p class="lead">Results, system diagrams, robots and moments from teaching. Select any image to enlarge it.</p>
+    </header>
+    <div class="filters" role="group" aria-label="Filter images">
+      <button type="button" data-filter="all" aria-pressed="true">All<small>{items.length}</small></button>
+      {groups.map((g) => <button type="button" data-filter={g} aria-pressed="false">{g}<small>{items.filter((i) => i.group === g).length}</small></button>)}
+    </div>
+    <ul class="masonry" style="padding-bottom:var(--section)">
+      {items.map(({ item, group, source, href }) => (
+        <li data-group={group}>
+          <Figure item={item} sizes="(max-width: 700px) 100vw, (max-width: 1050px) 50vw, 400px" />
+          <a class="source" href={href}>{source}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const items = document.querySelectorAll<HTMLElement>('.masonry > li');
+    buttons.forEach((button) =>
+      button.addEventListener('click', () => {
+        const filter = button.dataset.filter;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+        items.forEach((item) => (item.hidden = filter !== 'all' && item.dataset.group !== filter));
+      }),
+    );
+  </script>
+</Base>

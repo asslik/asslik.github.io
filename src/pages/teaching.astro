@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import Figure from '../components/Figure.astro';
+import { getTeaching, visible } from '../data/content';
+const teaching = await getTeaching();
+---
+<Base title="Teaching" description="Lectures and training given by Hatim Asslik in visual SLAM, robotics, computer vision and AI.">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">Teaching and training</p>
+      <h1>Sharing the craft</h1>
+      <p class="lead">From a Visual SLAM lecture for Executive Master students to hands-on robotics and AI sessions with young learners.</p>
+    </header>
+    <div style="padding-bottom:var(--section)">
+      {teaching.map(({ data }) => {
+        const media = visible(data.media);
+        return (
+          <section class="teach">
+            <div class="teach__when"><b>{data.duration}</b><span class="meta">{data.period}</span></div>
+            <div>
+              <p class="eyebrow">{data.role}</p>
+              <h2 style="margin-top:.35rem">{data.title}</h2>
+              <p class="teach__sub">{[data.detail, data.org].filter(Boolean).join(' · ')}</p>
+              {media.length > 0 && (
+                <div class:list={['teach__media', media.length === 1 && 'teach__media--one']}>
+                  {media.map((item) => <Figure item={item} fit="crop" ratio={media.length === 1 ? "16 / 9" : "3 / 2"} sizes="(max-width: 760px) 100vw, 45vw" />)}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+# Papers are published only as scrambled files in public/papers.
+*.pdf
+!public/cv/cv.pdf

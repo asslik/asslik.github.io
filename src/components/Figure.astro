@@ -1,0 +1,25 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import type { Media } from '../data/content';
+
+interface Props {
+  item: Media;
+  sizes?: string;
+  fit?: 'natural' | 'contain' | 'crop' | 'fill';
+  ratio?: string;
+  eager?: boolean;
+  caption?: boolean;
+  class?: string;
+}
+const { item, sizes = '(max-width: 760px) 100vw, 50vw', fit = 'natural', ratio, eager = false, caption = true, class: className } = Astro.props;
+const widths = [480, 800, 1200, 1600, 2000].filter((w) => w < item.src.width).concat(item.src.width);
+const full = await getImage({ src: item.src, width: Math.min(item.src.width, 2200), format: 'webp', quality: 86 });
+---
+<figure class:list={['fig', `fig--${item.kind}`, fit !== 'natural' && `fig--${fit}`, className]} style={ratio ? `--ratio:${ratio}` : undefined}>
+  <button type="button" class="fig__btn" data-lightbox data-full={full.src} data-alt={item.alt} data-caption={item.caption ?? ''} data-kind={item.kind} aria-label={`Enlarge image: ${item.alt}`}>
+    <span class="fig__frame">
+      <Picture src={item.src} alt={item.alt} formats={['avif']} fallbackFormat="webp" widths={widths} sizes={sizes} quality={78} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} />
+    </span>
+  </button>
+  {caption && item.caption && <figcaption>{item.caption}</figcaption>}
+</figure>

@@ -1,0 +1,42 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Figure from '../../components/Figure.astro';
+import { getProjects, visible } from '../../data/content';
+
+export async function getStaticPaths() {
+  const projects = (await getProjects()).filter((p) => visible(p.data.media).length);
+  return projects.map((project, i) => ({ params: { slug: project.id }, props: { project, next: projects[(i + 1) % projects.length] } }));
+}
+const { project, next } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const [cover, ...rest] = visible(data.media);
+const ratio = Math.max(cover.src.width / cover.src.height, 1.75).toFixed(3);
+---
+<Base title={data.title} description={data.summary}>
+  <article class="wrap">
+    <header class="detail-head">
+      <p class="crumb"><a href="/projects/">Projects</a> / {data.title}</p>
+      <h1>{data.title}</h1>
+      <p class="authors">{data.summary}</p>
+      <div class="venue-row"><span class="meta">{data.context}{data.year ? ` · ${data.year}` : ''}</span></div>
+    </header>
+    <Figure item={cover} fit={cover.kind === 'photo' ? 'crop' : 'contain'} ratio={ratio} eager sizes="(max-width: 1300px) 100vw, 1240px" />
+    <div class="article">
+      <aside class="article__side">
+        <h2>Tools</h2>
+        <ul class="tags">{data.tools.map((t) => <li>{t}</li>)}</ul>
+        {data.related.length > 0 && <h2>Related</h2>}
+        {data.related.length > 0 && <ul>{data.related.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>}
+      </aside>
+      <div class="prose"><Content /></div>
+    </div>
+    {rest.length > 0 && (
+      <div class:list={['figure-stack', rest.length > 1 && 'figure-stack--2']} style="padding-block:clamp(1.5rem,3vw,2.5rem)">
+        {rest.map((item) => <Figure item={item} sizes="(max-width: 760px) 100vw, 60vw" />)}
+      </div>
+    )}
+    <a class="next-link" href={`/projects/${next.id}/`}><span class="eyebrow">Next</span><b>{next.data.title}</b></a>
+  </article>
+</Base>

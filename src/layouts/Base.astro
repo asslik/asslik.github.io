@@ -1,0 +1,104 @@
+---
+import '@fontsource-variable/crimson-pro/wght.css';
+import '@fontsource-variable/crimson-pro/wght-italic.css';
+import '@fontsource-variable/cabin/wght.css';
+import '@fontsource-variable/inconsolata/wght.css';
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { nav, profile } from '../data/profile';
+import { searchable } from '../data/search.mjs';
+
+interface Props {
+  title?: string;
+  description?: string;
+  hero?: boolean;
+  bare?: boolean;
+  contact?: boolean;
+  noindex?: boolean;
+  jsonLd?: object;
+}
+const { title, description = profile.description, hero = false, bare = false, contact = true, noindex = false, jsonLd } = Astro.props;
+const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · Computer Vision, AI & Robotics`;
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+const isCurrent = (href: string) => path === href || path.startsWith(href);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <meta name="theme-color" content="#0b0e11" />
+    {!searchable && <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />}
+    {searchable && noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {searchable && <link rel="sitemap" href="/sitemap-index.xml" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+    {searchable && jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <script is:inline>
+      (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('theme'); } catch (e) {}
+        var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class:list={['site-header', hero && 'site-header--hero']}>
+      <div class="wrap site-header__in">
+        <a class="brand" href="/"><Icon name="bookmark" />{profile.name}</a>
+        <div class="site-header__end">
+          <nav class="site-nav" id="site-nav" aria-label="Main">
+            {nav.map((item) => <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>)}
+          </nav>
+          <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
+            <span class="sun"><Icon name="moon" /></span><span class="moon"><Icon name="sun" /></span>
+          </button>
+          <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><Icon name="menu" /></button>
+        </div>
+      </div>
+    </header>
+    <main id="main"><slot /></main>
+    {!bare && contact && <ContactBand />}
+    {!bare && (
+      <footer class="site-footer">
+        <div class="wrap site-footer__in">
+          <span>© {new Date().getFullYear()} {profile.name}</span>
+          <nav aria-label="Footer">
+            {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+            <a href={profile.linkedin} rel="me noopener" target="_blank">LinkedIn</a>
+          </nav>
+        </div>
+      </footer>
+    )}
+    <dialog class="lightbox" data-lightbox-dialog aria-label="Image viewer">
+      <div class="lightbox__in">
+        <div class="lightbox__bar"><span data-lb-count></span><button type="button" data-lb-close aria-label="Close image viewer"><span style="width:20px;display:block"><Icon name="close" /></span></button></div>
+        <div class="lightbox__stage">
+          <button type="button" data-lb-prev aria-label="Previous image">←</button>
+          <div class="lightbox__img-wrap"><img alt="" /></div>
+          <button type="button" data-lb-next aria-label="Next image">→</button>
+        </div>
+        <p class="lightbox__cap" data-lb-caption></p>
+      </div>
+    </dialog>
+    <script>
+      import '../scripts/site.ts';
+      import '../scripts/lightbox.ts';
+    </script>
+  </body>
+</html>

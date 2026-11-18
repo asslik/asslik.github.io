@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import Figure from '../../components/Figure.astro';
+import Icon from '../../components/Icon.astro';
+import { getExperience, getResearch, statusLabel, visible } from '../../data/content';
+
+const research = await getResearch();
+const phd = (await getExperience()).find((e) => e.id === 'phd')!;
+const lab = visible(phd.data.media)[0];
+---
+<Base title="Research" description="Publications and ongoing research by Hatim Asslik on visual SLAM, depth perception and 3D Gaussian Splatting.">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">Research</p>
+      <h1>Perception that holds up outside the benchmark</h1>
+      <p class="lead">My work looks at what breaks visual SLAM in real places, and how learned components can make these systems more reliable.</p>
+    </header>
+    <div class="section" style="padding-top:0">
+      {research.map((paper) => {
+        const cover = visible(paper.data.media)[0];
+        return (
+          <article class="plate rise">
+            <div class="plate__media"><Figure item={cover} fit="contain" ratio="16 / 10" caption={false} sizes="(max-width: 980px) 100vw, 56vw" /></div>
+            <div class="plate__body">
+              <div class="plate__meta"><span class="eyebrow">{paper.data.theme}</span><span class:list={['status', `status--${paper.data.status}`]}>{statusLabel[paper.data.status]}</span></div>
+              <h3 style="font-size:clamp(1.7rem,2.6vw,2.2rem)"><a href={`/research/${paper.id}/`}>{paper.data.title}</a></h3>
+              <p class="plate__sum">{paper.data.authors.join(', ')}</p>
+              <p class="meta" style="margin-top:.45rem">{paper.data.venue}{paper.data.year ? `, ${paper.data.year}` : ''}</p>
+              <div class="btn-row">
+                <a class="btn" href={`/research/${paper.id}/read/`}><Icon name="read" /> Read paper</a>
+                <a class="more" href={`/research/${paper.id}/`}>Overview</a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+  <section class="section section--sunken" aria-labelledby="lab-title">
+    <div class="wrap about about--lab">
+      <Figure item={lab} fit="crop" ratio="4 / 5" sizes="(max-width: 980px) 100vw, 34vw" />
+      <div>
+        <p class="eyebrow">In the lab</p>
+        <h2 id="lab-title">From calibrated data to better maps</h2>
+        <p class="about__text">The research also involves hands-on data work, including camera calibration and building an annotated RGB-D dataset for reflective environments.</p>
+      </div>
+    </div>
+  </section>
+</Base>

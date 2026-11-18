@@ -1,0 +1,93 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import Figure from '../../../components/Figure.astro';
+import Icon from '../../../components/Icon.astro';
+import { profile } from '../../../data/profile';
+import { getResearch, statusLabel, visible } from '../../../data/content';
+import { searchable } from '../../../data/search.mjs';
+
+export async function getStaticPaths() {
+  const research = await getResearch();
+  return research.map((paper, i) => ({ params: { slug: paper.id }, props: { paper, next: research[(i + 1) % research.length] } }));
+}
+const { paper, next } = Astro.props;
+const { data } = paper;
+const { Content } = await render(paper);
+const [cover, ...figures] = visible(data.media);
+const coverRatio = Math.max(cover.src.width / cover.src.height, 1.9).toFixed(3);
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'ScholarlyArticle', headline: data.title,
+  author: data.authors.map((name) => ({ '@type': 'Person', name })),
+  ...(data.year && { datePublished: String(data.year) }),
+  ...(data.doi && { sameAs: `https://doi.org/${data.doi}` }),
+};
+---
+<Base title={data.short} description={data.summary} jsonLd={jsonLd}>
+  <Fragment slot="head">
+    {searchable && data.status === 'published' && <>
+      <meta name="citation_title" content={data.title} />
+      {data.authors.map((a) => <meta name="citation_author" content={a} />)}
+      <meta name="citation_publication_date" content={String(data.year)} />
+      <meta name="citation_journal_title" content="Procedia Computer Science" />
+      <meta name="citation_doi" content={data.doi} />
+    </>}
+  </Fragment>
+  <article class="wrap">
+    <header class="detail-head">
+      <p class="crumb"><a href="/research/">Research</a> / {data.short}</p>
+      <h1>{data.title}</h1>
+      <p class="authors">{data.authors.map((a, i) => <>{i > 0 && ', '}{a === profile.name ? <strong>{a}</strong> : a}</>)}</p>
+      <div class="venue-row">
+        <span class:list={['status', `status--${data.status}`]}>{statusLabel[data.status]}</span>
+        <span class="meta">{data.venue}{data.year ? `, ${data.year}` : ''}</span>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--primary" href={`/research/${paper.id}/read/`}><Icon name="read" /> Read paper</a>
+        {data.links.map((l) => <a class="btn" href={l.href} rel="noopener" target="_blank">{l.label} <Icon name="out" /></a>)}
+      </div>
+    </header>
+    <Figure item={cover} fit="contain" ratio={coverRatio} eager sizes="(max-width: 1300px) 100vw, 1240px" />
+    <ul class="stats" aria-label="Key results">
+      {data.highlights.map((h) => <li><b>{h.value}</b><span>{h.label}</span></li>)}
+    </ul>
+    <div class="article">
+      <aside class="article__side">
+        <h2>Topics</h2>
+        <ul class="tags">{data.tags.map((t) => <li>{t}</li>)}</ul>
+        <h2>Paper</h2>
+        <p>{data.pages} pages, view only</p>
+      </aside>
+      <div>
+        <div class="prose">
+          <Content />
+          {data.results.length > 0 && <h2>Results</h2>}
+          {data.resultsIntro && <p>{data.resultsIntro}</p>}
+        </div>
+        {data.results.map((table) => (
+          <div class="results-block">
+            <h3>{table.title}</h3>
+            <div class="table-wrap" tabindex="0" role="region" aria-label={table.title}>
+              <table>
+                <thead><tr>{table.columns.map((c) => <th scope="col">{c}</th>)}</tr></thead>
+                <tbody>{table.rows.map((row) => <tr>{row.map((cell, i) => <td class:list={{ em: i === table.emphasis }}>{cell}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+        {data.bibtex && (
+          <div class="cite">
+            <button class="btn" type="button" data-copy="bibtex">Copy BibTeX</button>
+            <pre id="bibtex">{data.bibtex.trim()}</pre>
+          </div>
+        )}
+      </div>
+    </div>
+    {figures.length > 0 && (
+      <div class="figure-stack" style="padding-block:clamp(1.5rem,3vw,2.5rem)">
+        {figures.map((item) => <Figure item={item} sizes="(max-width: 1300px) 100vw, 1240px" fit={item.src.height > item.src.width ? 'contain' : 'natural'} ratio="16 / 10" />)}
+      </div>
+    )}
+    <a class="next-link" href={`/research/${next.id}/`}><span class="eyebrow">Next</span><b>{next.data.short}</b></a>
+  </article>
+</Base>
